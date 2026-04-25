@@ -17,6 +17,7 @@ interface FetchNotesParams {
   perPage?: number;
   search?: string;
   tag?: string;
+  query?: string;
 }
 
 interface CheckSessionResponse {

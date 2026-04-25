@@ -1,7 +1,7 @@
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
 import { cookies } from 'next/headers';
 import type { Note } from '@/types/note';
-import type { User, CheckSessionRequest } from '@/types/user';
+import type { User } from '@/types/user';
 
 interface NotesResponse {
   notes: Note[];
@@ -14,6 +14,10 @@ interface FetchNotesParams {
   search?: string;
   tag?: string;
   query?: string;
+}
+
+interface CheckSessionRequest {
+  success: boolean;
 }
 
 const createServerApi = async () => {
@@ -60,23 +64,11 @@ export const getMe = async (): Promise<User | null> => {
   }
 };
 
-export const checkSession = async (): Promise<boolean> => {
+export const checkSession = async (): Promise<
+  AxiosResponse<CheckSessionRequest>
+> => {
   const serverApi = await createServerApi();
-
-  try {
-    const { data } = await serverApi.get<CheckSessionRequest>('/auth/session');
-    return Boolean(data?.success);
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      const status = error.response?.status;
-
-      if (status === 400 || status === 401) {
-        return false;
-      }
-    }
-
-    return false;
-  }
+  return serverApi.get<CheckSessionRequest>('/auth/session');
 };
 
 export const getCategories = async () => {

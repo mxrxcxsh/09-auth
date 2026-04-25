@@ -14,11 +14,3 @@ export type LoginRequest = {
   email: string;
   password: string;
 };
-
-export type CheckSessionRequest = {
-  success: boolean;
-};
-
-export type UserRequest = {
-  username: string;
-};

@@ -2,13 +2,7 @@ import { api } from './api';
 import axios from 'axios';
 
 import type { Note, CreateNote } from '@/types/note';
-import type {
-  User,
-  RegisterRequest,
-  LoginRequest,
-  CheckSessionRequest,
-  UserRequest,
-} from '@/types/user';
+import type { User, RegisterRequest, LoginRequest } from '@/types/user';
 
 interface NotesResponse {
   notes: Note[];
@@ -19,6 +13,14 @@ interface fetchNotesParams {
   perPage: number;
   query?: string;
   tag?: string;
+}
+
+interface CheckSessionRequest {
+  success: boolean;
+}
+
+interface UserRequest {
+  username: string;
 }
 
 export const fetchNotes = async ({

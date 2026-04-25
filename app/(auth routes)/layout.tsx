@@ -1,7 +1,18 @@
-export default function AuthRoutesLayout({
-  children,
-}: {
+'use client';
+
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+
+type Props = {
   children: React.ReactNode;
-}) {
-  return children;
+};
+
+export default function AuthLayout({ children }: Props) {
+  const router = useRouter();
+
+  useEffect(() => {
+    router.refresh();
+  }, [router]);
+
+  return <>{children}</>;
 }

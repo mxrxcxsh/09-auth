@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createNote } from '@/lib/api/clientApi';
 import { useNoteDraftStore } from '@/lib/store/noteStore';
 import type { Category } from '@/types/note';
@@ -26,6 +26,19 @@ function NoteForm({ categories }: NoteFormProps) {
 
   const { draft, setDraft, clearDraft } = useNoteDraftStore();
 
+  const createNoteMutation = useMutation({
+    mutationFn: createNote,
+    onSuccess: async () => {
+      clearDraft();
+      await queryClient.invalidateQueries({ queryKey: ['notes'] });
+      router.back();
+      router.refresh();
+    },
+    onError: () => {
+      setErrors({ form: 'Unable to create note. Please try again.' });
+    },
+  });
+
   const handleCancel = () => {
     clearDraft();
     router.push('/notes/filter/all');
@@ -40,10 +53,12 @@ function NoteForm({ categories }: NoteFormProps) {
     setDraft({ ...draft, [name]: value });
   };
 
-  async function handleSubmit(formData: FormData) {
-    const title = String(formData.get('title') ?? '').trim();
-    const content = String(formData.get('content') ?? '').trim();
-    const tag = String(formData.get('tag') ?? '').trim();
+  const handleSubmit = async (evt: React.FormEvent<HTMLFormElement>) => {
+    evt.preventDefault();
+
+    const title = draft.title.trim();
+    const content = draft.content.trim();
+    const tag = draft.tag.trim();
 
     const nextErrors: FormErrors = {};
 
@@ -70,20 +85,12 @@ function NoteForm({ categories }: NoteFormProps) {
       return;
     }
 
-    try {
-      setErrors({});
-      await createNote({ title, content, tag });
-      clearDraft();
-      await queryClient.invalidateQueries({ queryKey: ['notes'] });
-      router.back();
-      router.refresh();
-    } catch {
-      setErrors({ form: 'Unable to create note. Please try again.' });
-    }
-  }
+    setErrors({});
+    createNoteMutation.mutate({ title, content, tag });
+  };
 
   return (
-    <form action={handleSubmit} className={css.form}>
+    <form onSubmit={handleSubmit} className={css.form}>
       <div className={css.formGroup}>
         <label htmlFor="title">Title</label>
         <input
@@ -139,8 +146,12 @@ function NoteForm({ categories }: NoteFormProps) {
           Cancel
         </button>
 
-        <button type="submit" className={css.submitButton}>
-          Create note
+        <button
+          type="submit"
+          className={css.submitButton}
+          disabled={createNoteMutation.isPending}
+        >
+          {createNoteMutation.isPending ? 'Creating...' : 'Create note'}
         </button>
       </div>
     </form>

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Roboto } from 'next/font/google';
 import Provider from '@/components/TanStackProvider/TanStackProvider';
+import AuthProvider from '@/components/AuthProvider/AuthProvider';
 import './globals.css';
 import 'modern-normalize';
 import Header from '@/components/Header/Header';
@@ -36,13 +37,15 @@ export default function RootLayout({
     <html lang="en" className={roboto.variable}>
       <body className="min-h-full flex flex-col">
         <Provider>
-          <Header />
-          <main>
-            {children}
-            {modal}
-          </main>
-          <div id="modal-root"></div>
-          <Footer />
+          <AuthProvider>
+            <Header />
+            <main>
+              {children}
+              {modal}
+            </main>
+            <div id="modal-root"></div>
+            <Footer />
+          </AuthProvider>
         </Provider>
       </body>
     </html>
